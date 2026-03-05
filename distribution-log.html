@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Distribution Log</title>
+  <title>Ali Hope Foundation Distribution</title>
   <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -246,7 +246,7 @@
   <!-- Login -->
   <div id="login-view">
     <div class="card">
-      <h1>Distribution Log</h1>
+      <h1>Ali Hope Foundation Distribution</h1>
       <div>
         <label for="username">Username</label>
         <input type="text" id="username" autocomplete="username" />
@@ -264,7 +264,7 @@
   <!-- App -->
   <div id="app-view">
     <header>
-      <h1>Distribution Log</h1>
+      <h1>Ali Hope Foundation Distribution</h1>
       <button class="btn secondary" id="logout-btn">Logout</button>
     </header>
 
@@ -278,8 +278,22 @@
             <input type="text" id="custname" placeholder="Full name" />
           </div>
           <div class="form-group">
+            <label for="telephone">Telephone</label>
+            <input type="text" id="telephone" placeholder="Phone number" />
+          </div>
+          <div class="form-group">
+            <label for="address">Delivery Address</label>
+            <input type="text" id="address" placeholder="Enter delivery address..." />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
             <label for="diapers">Diapers</label>
             <input type="number" id="diapers" min="0" placeholder="0" />
+          </div>
+          <div class="form-group">
+            <label for="diaper-size">Diaper Size</label>
+            <input type="text" id="diaper-size" placeholder="e.g. NB, 1, 2, 3…" />
           </div>
           <div class="form-group">
             <label for="wipes">Wipes</label>
@@ -290,10 +304,6 @@
           <div class="form-group">
             <label for="nutrition">Nutrition</label>
             <input type="number" id="nutrition" min="0" placeholder="0" />
-          </div>
-          <div class="form-group" style="grid-column: span 2;">
-            <label for="address">Delivery Address</label>
-            <input type="text" id="address" placeholder="Enter delivery address..." />
           </div>
         </div>
         <div class="submit-row">
@@ -307,7 +317,7 @@
         <label class="import-zone" for="excel-file-input">
           <span style="font-size:1.8rem;">📂</span>
           <p>Click to select an <strong>.xlsx</strong> or <strong>.csv</strong> file</p>
-          <p>Expected columns: <span class="tag">Name</span> <span class="tag">Address</span> <span class="tag">Diapers</span> <span class="tag">Wipes</span> <span class="tag">Nutrition</span></p>
+          <p>Expected columns: <span class="tag">Name</span> <span class="tag">Telephone</span> <span class="tag">Address</span> <span class="tag">Diapers</span> <span class="tag">Diaper Size</span> <span class="tag">Wipes</span> <span class="tag">Nutrition</span></p>
           <input type="file" id="excel-file-input" accept=".xlsx,.xls,.csv" />
         </label>
         <div class="import-preview" id="import-preview"></div>
@@ -329,8 +339,10 @@
               <tr>
                 <th>Date / Time</th>
                 <th>Name</th>
+                <th>Telephone</th>
                 <th>Address</th>
                 <th>Diapers</th>
+                <th>Diaper Size</th>
                 <th>Wipes</th>
                 <th>Nutrition</th>
               </tr>
@@ -401,11 +413,13 @@
 
     // ── Form ──────────────────────────────────────────────
     document.getElementById('submit-btn').addEventListener('click', () => {
-      const name      = document.getElementById('custname').value.trim();
-      const diapers   = document.getElementById('diapers').value.trim();
-      const wipes     = document.getElementById('wipes').value.trim();
-      const nutrition = document.getElementById('nutrition').value.trim();
-      const address   = document.getElementById('address').value.trim();
+      const name       = document.getElementById('custname').value.trim();
+      const telephone  = document.getElementById('telephone').value.trim();
+      const diapers    = document.getElementById('diapers').value.trim();
+      const diaperSize = document.getElementById('diaper-size').value.trim();
+      const wipes      = document.getElementById('wipes').value.trim();
+      const nutrition  = document.getElementById('nutrition').value.trim();
+      const address    = document.getElementById('address').value.trim();
 
       if (!address) {
         alert('Please enter a delivery address.');
@@ -413,12 +427,14 @@
       }
 
       const record = {
-        datetime:  new Date().toLocaleString(),
+        datetime:   new Date().toLocaleString(),
         name,
+        telephone,
         address,
-        diapers:   diapers   === '' ? 0 : Number(diapers),
-        wipes:     wipes     === '' ? 0 : Number(wipes),
-        nutrition: nutrition === '' ? 0 : Number(nutrition),
+        diapers:    diapers   === '' ? 0 : Number(diapers),
+        diaperSize,
+        wipes:      wipes     === '' ? 0 : Number(wipes),
+        nutrition:  nutrition === '' ? 0 : Number(nutrition),
       };
 
       const records = loadRecords();
@@ -426,11 +442,13 @@
       saveRecords(records);
 
       // Reset form
-      document.getElementById('custname').value  = '';
-      document.getElementById('diapers').value   = '';
-      document.getElementById('wipes').value     = '';
-      document.getElementById('nutrition').value = '';
-      document.getElementById('address').value   = '';
+      document.getElementById('custname').value   = '';
+      document.getElementById('telephone').value  = '';
+      document.getElementById('diapers').value    = '';
+      document.getElementById('diaper-size').value = '';
+      document.getElementById('wipes').value      = '';
+      document.getElementById('nutrition').value  = '';
+      document.getElementById('address').value    = '';
 
       renderTable();
     });
@@ -466,17 +484,19 @@
               return '';
             };
             return {
-              datetime:  new Date().toLocaleString(),
-              name:      get('name', 'customer', 'customer name', 'full name'),
-              address:   get('address', 'delivery address'),
-              diapers:   Number(get('diapers', 'diaper')) || 0,
-              wipes:     Number(get('wipes', 'wipe')) || 0,
-              nutrition: Number(get('nutrition')) || 0,
+              datetime:   new Date().toLocaleString(),
+              name:       get('name', 'customer', 'customer name', 'full name'),
+              telephone:  get('telephone', 'phone', 'tel', 'phone number'),
+              address:    get('address', 'delivery address'),
+              diapers:    Number(get('diapers', 'diaper')) || 0,
+              diaperSize: get('diaper size', 'diapersize', 'diaper_size', 'size'),
+              wipes:      Number(get('wipes', 'wipe')) || 0,
+              nutrition:  Number(get('nutrition')) || 0,
             };
           }).filter(r => r.address || r.name);
 
           if (pendingImport.length === 0) {
-            preview.textContent = 'No valid rows found. Make sure columns are named: Name, Address, Diapers, Wipes, Nutrition.';
+            preview.textContent = 'No valid rows found. Make sure columns are named: Name, Telephone, Address, Diapers, Diaper Size, Wipes, Nutrition.';
           } else {
             preview.textContent = `Found ${pendingImport.length} record(s) ready to import.`;
             importBtn.disabled = false;
@@ -510,7 +530,7 @@
       tbody.innerHTML = '';
 
       if (records.length === 0) {
-        tbody.innerHTML = '<tr class="empty-row"><td colspan="6">No records yet.</td></tr>';
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="8">No records yet.</td></tr>';
         return;
       }
 
@@ -519,8 +539,10 @@
         tr.innerHTML = `
           <td>${escapeHtml(r.datetime)}</td>
           <td>${escapeHtml(r.name || '—')}</td>
+          <td>${escapeHtml(r.telephone || '—')}</td>
           <td>${escapeHtml(r.address)}</td>
           <td>${r.diapers}</td>
+          <td>${escapeHtml(r.diaperSize || '—')}</td>
           <td>${r.wipes}</td>
           <td>${r.nutrition}</td>
         `;
