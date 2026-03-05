@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Distribution Log</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: #1a1a2e;
+      font-family: 'Segoe UI', sans-serif;
+      color: #eee;
+    }
+
+    /* ── Login ── */
+    #login-view {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card {
+      background: #16213e;
+      border: 2px solid #0f3460;
+      border-radius: 14px;
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 380px;
+    }
+
+    .card h1 {
+      font-size: 1.8rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #e94560;
+      margin-bottom: 1.8rem;
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #888;
+      margin-bottom: 0.35rem;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="number"],
+    textarea {
+      width: 100%;
+      padding: 0.6rem 0.9rem;
+      background: #1a1a2e;
+      border: 2px solid #0f3460;
+      border-radius: 8px;
+      color: #eee;
+      font-size: 1rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+      margin-bottom: 1.1rem;
+    }
+
+    input:focus, textarea:focus { border-color: #e94560; }
+
+    textarea { resize: vertical; min-height: 80px; }
+
+    .error-msg {
+      color: #e94560;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+      min-height: 1.2rem;
+    }
+
+    .btn {
+      padding: 0.7rem 1.6rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      background: #e94560;
+      color: #fff;
+      cursor: pointer;
+      letter-spacing: 1px;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn:hover { background: #c73652; transform: scale(1.04); }
+
+    .btn.secondary {
+      background: #0f3460;
+    }
+    .btn.secondary:hover { background: #163a6e; }
+
+    .btn-full { width: 100%; }
+
+    /* ── App view ── */
+    #app-view { display: none; }
+
+    header {
+      background: #16213e;
+      border-bottom: 2px solid #0f3460;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #e94560;
+    }
+
+    main {
+      max-width: 860px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .form-card {
+      background: #16213e;
+      border: 2px solid #0f3460;
+      border-radius: 14px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .form-card h2 {
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #a8dadc;
+      margin-bottom: 1.4rem;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .form-group { display: flex; flex-direction: column; }
+
+    .submit-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 0.5rem;
+    }
+
+    /* ── Table ── */
+    .table-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .table-header h2 {
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #a8dadc;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+
+    th {
+      background: #0f3460;
+      color: #a8dadc;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-size: 0.75rem;
+      padding: 0.7rem 1rem;
+      text-align: left;
+    }
+
+    td {
+      padding: 0.7rem 1rem;
+      border-bottom: 1px solid #0f3460;
+      color: #ddd;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    tr:hover td { background: #16213e; }
+
+    .empty-row td {
+      text-align: center;
+      color: #555;
+      padding: 2rem;
+    }
+
+    @media (max-width: 560px) {
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Login -->
+  <div id="login-view">
+    <div class="card">
+      <h1>Distribution Log</h1>
+      <div>
+        <label for="username">Username</label>
+        <input type="text" id="username" autocomplete="username" />
+
+        <label for="password">Password</label>
+        <input type="password" id="password" autocomplete="current-password" />
+
+        <div class="error-msg" id="login-error"></div>
+
+        <button class="btn btn-full" id="login-btn">Login</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- App -->
+  <div id="app-view">
+    <header>
+      <h1>Distribution Log</h1>
+      <button class="btn secondary" id="logout-btn">Logout</button>
+    </header>
+
+    <main>
+      <!-- Submission form -->
+      <div class="form-card">
+        <h2>New Distribution Record</h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="diapers">Diapers</label>
+            <input type="number" id="diapers" min="0" placeholder="0" />
+          </div>
+          <div class="form-group">
+            <label for="wipes">Wipes</label>
+            <input type="number" id="wipes" min="0" placeholder="0" />
+          </div>
+          <div class="form-group">
+            <label for="nutrition">Nutrition</label>
+            <input type="number" id="nutrition" min="0" placeholder="0" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="address">Delivery Address</label>
+          <textarea id="address" placeholder="Enter delivery address..."></textarea>
+        </div>
+        <div class="submit-row">
+          <button class="btn" id="submit-btn">Submit Record</button>
+        </div>
+      </div>
+
+      <!-- History -->
+      <div class="form-card">
+        <div class="table-header">
+          <h2>Submission History</h2>
+          <button class="btn secondary" id="clear-btn">Clear History</button>
+        </div>
+        <div class="table-wrap">
+          <table id="history-table">
+            <thead>
+              <tr>
+                <th>Date / Time</th>
+                <th>Address</th>
+                <th>Diapers</th>
+                <th>Wipes</th>
+                <th>Nutrition</th>
+              </tr>
+            </thead>
+            <tbody id="history-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const CREDENTIALS = { username: 'admin', password: '1234' };
+    const STORAGE_KEY = 'distro-log';
+
+    // ── Auth ──────────────────────────────────────────────
+    function isLoggedIn() {
+      return sessionStorage.getItem('loggedIn') === 'true';
+    }
+
+    function showApp() {
+      document.getElementById('login-view').style.display = 'none';
+      document.getElementById('app-view').style.display = 'block';
+      renderTable();
+    }
+
+    function showLogin() {
+      document.getElementById('login-view').style.display = '';
+      document.getElementById('app-view').style.display = 'none';
+      document.getElementById('login-error').textContent = '';
+      document.getElementById('username').value = '';
+      document.getElementById('password').value = '';
+    }
+
+    document.getElementById('login-btn').addEventListener('click', () => {
+      const user = document.getElementById('username').value.trim();
+      const pass = document.getElementById('password').value;
+      if (user === CREDENTIALS.username && pass === CREDENTIALS.password) {
+        sessionStorage.setItem('loggedIn', 'true');
+        showApp();
+      } else {
+        document.getElementById('login-error').textContent = 'Invalid username or password.';
+      }
+    });
+
+    // Allow pressing Enter to log in
+    document.getElementById('password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('login-btn').click();
+    });
+
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      sessionStorage.removeItem('loggedIn');
+      showLogin();
+    });
+
+    // ── Data ──────────────────────────────────────────────
+    function loadRecords() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveRecords(records) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+    }
+
+    // ── Form ──────────────────────────────────────────────
+    document.getElementById('submit-btn').addEventListener('click', () => {
+      const diapers   = document.getElementById('diapers').value.trim();
+      const wipes     = document.getElementById('wipes').value.trim();
+      const nutrition = document.getElementById('nutrition').value.trim();
+      const address   = document.getElementById('address').value.trim();
+
+      if (!address) {
+        alert('Please enter a delivery address.');
+        return;
+      }
+
+      const record = {
+        datetime:  new Date().toLocaleString(),
+        address,
+        diapers:   diapers   === '' ? 0 : Number(diapers),
+        wipes:     wipes     === '' ? 0 : Number(wipes),
+        nutrition: nutrition === '' ? 0 : Number(nutrition),
+      };
+
+      const records = loadRecords();
+      records.unshift(record);
+      saveRecords(records);
+
+      // Reset form
+      document.getElementById('diapers').value   = '';
+      document.getElementById('wipes').value     = '';
+      document.getElementById('nutrition').value = '';
+      document.getElementById('address').value   = '';
+
+      renderTable();
+    });
+
+    // ── Table ─────────────────────────────────────────────
+    function renderTable() {
+      const tbody = document.getElementById('history-body');
+      const records = loadRecords();
+      tbody.innerHTML = '';
+
+      if (records.length === 0) {
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="5">No records yet.</td></tr>';
+        return;
+      }
+
+      records.forEach(r => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${escapeHtml(r.datetime)}</td>
+          <td>${escapeHtml(r.address)}</td>
+          <td>${r.diapers}</td>
+          <td>${r.wipes}</td>
+          <td>${r.nutrition}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    document.getElementById('clear-btn').addEventListener('click', () => {
+      if (confirm('Clear all history? This cannot be undone.')) {
+        saveRecords([]);
+        renderTable();
+      }
+    });
+
+    // ── Init ──────────────────────────────────────────────
+    if (isLoggedIn()) {
+      showApp();
+    }
+  </script>
+</body>
+</html>
