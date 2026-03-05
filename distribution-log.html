@@ -288,8 +288,12 @@
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label for="diapers">Diapers</label>
-            <input type="text" id="diapers" placeholder="e.g. 2, NB, XL" />
+            <label for="diapers">Diaper QTY</label>
+            <input type="number" id="diapers" min="0" placeholder="0" />
+          </div>
+          <div class="form-group">
+            <label for="diaper-size">Diaper Size</label>
+            <input type="text" id="diaper-size" placeholder="e.g. NB, 1, 2, XL" />
           </div>
           <div class="form-group">
             <label for="wipes">Wipes</label>
@@ -313,7 +317,7 @@
         <label class="import-zone" for="excel-file-input">
           <span style="font-size:1.8rem;">📂</span>
           <p>Click to select an <strong>.xlsx</strong> or <strong>.csv</strong> file</p>
-          <p>Expected columns: <span class="tag">Name</span> <span class="tag">Telephone</span> <span class="tag">Address</span> <span class="tag">Diapers</span> <span class="tag">Wipes</span> <span class="tag">Nutrition</span></p>
+          <p>Expected columns: <span class="tag">Name</span> <span class="tag">Telephone</span> <span class="tag">Address</span> <span class="tag">Diaper QTY</span> <span class="tag">Diaper Size</span> <span class="tag">Wipes</span> <span class="tag">Nutrition</span></p>
           <input type="file" id="excel-file-input" accept=".xlsx,.xls,.csv" />
         </label>
         <div class="import-preview" id="import-preview"></div>
@@ -337,7 +341,8 @@
                 <th>Name</th>
                 <th>Telephone</th>
                 <th>Address</th>
-                <th>Diapers</th>
+                <th>Diaper QTY</th>
+                <th>Diaper Size</th>
                 <th>Wipes</th>
                 <th>Nutrition</th>
               </tr>
@@ -411,6 +416,7 @@
       const name       = document.getElementById('custname').value.trim();
       const telephone  = document.getElementById('telephone').value.trim();
       const diapers    = document.getElementById('diapers').value.trim();
+      const diaperSize = document.getElementById('diaper-size').value.trim();
       const wipes      = document.getElementById('wipes').value.trim();
       const nutrition  = document.getElementById('nutrition').value.trim();
       const address    = document.getElementById('address').value.trim();
@@ -425,7 +431,8 @@
         name,
         telephone,
         address,
-        diapers,
+        diapers:    diapers === '' ? 0 : Number(diapers),
+        diaperSize,
         wipes:      wipes     === '' ? 0 : Number(wipes),
         nutrition:  nutrition === '' ? 0 : Number(nutrition),
       };
@@ -438,6 +445,7 @@
       document.getElementById('custname').value   = '';
       document.getElementById('telephone').value  = '';
       document.getElementById('diapers').value    = '';
+      document.getElementById('diaper-size').value = '';
       document.getElementById('wipes').value      = '';
       document.getElementById('nutrition').value  = '';
       document.getElementById('address').value    = '';
@@ -480,7 +488,8 @@
               name:       get('name', 'customer', 'customer name', 'full name'),
               telephone:  get('telephone', 'phone', 'tel', 'phone number'),
               address:    get('address', 'delivery address'),
-              diapers:    get('diapers', 'diaper'),
+              diapers:    Number(get('diaper qty', 'diaper quantity', 'diapers', 'diaper')) || 0,
+              diaperSize: get('diaper size', 'diapersize', 'diaper_size', 'size'),
               wipes:      Number(get('wipes', 'wipe')) || 0,
               nutrition:  Number(get('nutrition')) || 0,
             };
@@ -521,7 +530,7 @@
       tbody.innerHTML = '';
 
       if (records.length === 0) {
-        tbody.innerHTML = '<tr class="empty-row"><td colspan="7">No records yet.</td></tr>';
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="8">No records yet.</td></tr>';
         return;
       }
 
@@ -533,6 +542,7 @@
           <td>${escapeHtml(r.telephone || '—')}</td>
           <td>${escapeHtml(r.address)}</td>
           <td>${escapeHtml(String(r.diapers ?? '—'))}</td>
+          <td>${escapeHtml(r.diaperSize || '—')}</td>
           <td>${r.wipes}</td>
           <td>${r.nutrition}</td>
         `;
