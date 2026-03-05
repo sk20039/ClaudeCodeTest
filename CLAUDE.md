@@ -16,7 +16,9 @@ start tictactoe.html
 
 ## Git Workflow
 
-The remote is GitHub (`sk20039/ClaudeCodeTest`). After every meaningful change:
+**Commit and push after every meaningful unit of work.** This ensures no progress is ever lost and the GitHub repo always reflects the current state.
+
+The remote is GitHub (`sk20039/ClaudeCodeTest`). The PAT is embedded in the remote URL, so `git push` works without additional auth prompts.
 
 ```bash
 git add <file>
@@ -24,7 +26,15 @@ git commit -m "concise description of what changed and why"
 git push
 ```
 
-The PAT is embedded in the remote URL, so `git push` works without additional auth prompts.
+### When to commit
+- After completing a feature or fix — even a small one.
+- Before and after any significant refactor.
+- Whenever the app is in a working state worth preserving.
+
+### Commit message format
+- Short imperative subject line: `Add export button to distribution log`
+- If more context is needed, add a blank line then a brief body.
+- Always append: `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>`
 
 ## Architecture Pattern
 
