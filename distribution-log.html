@@ -289,7 +289,7 @@
         <div class="form-row">
           <div class="form-group">
             <label for="diapers">Diapers</label>
-            <input type="number" id="diapers" min="0" placeholder="0" />
+            <input type="text" id="diapers" placeholder="e.g. 2, NB, XL" />
           </div>
           <div class="form-group">
             <label for="diaper-size">Diaper Size</label>
@@ -431,7 +431,7 @@
         name,
         telephone,
         address,
-        diapers:    diapers   === '' ? 0 : Number(diapers),
+        diapers,
         diaperSize,
         wipes:      wipes     === '' ? 0 : Number(wipes),
         nutrition:  nutrition === '' ? 0 : Number(nutrition),
@@ -488,7 +488,7 @@
               name:       get('name', 'customer', 'customer name', 'full name'),
               telephone:  get('telephone', 'phone', 'tel', 'phone number'),
               address:    get('address', 'delivery address'),
-              diapers:    Number(get('diapers', 'diaper')) || 0,
+              diapers:    get('diapers', 'diaper'),
               diaperSize: get('diaper size', 'diapersize', 'diaper_size', 'size'),
               wipes:      Number(get('wipes', 'wipe')) || 0,
               nutrition:  Number(get('nutrition')) || 0,
@@ -541,7 +541,7 @@
           <td>${escapeHtml(r.name || '—')}</td>
           <td>${escapeHtml(r.telephone || '—')}</td>
           <td>${escapeHtml(r.address)}</td>
-          <td>${r.diapers}</td>
+          <td>${escapeHtml(String(r.diapers ?? '—'))}</td>
           <td>${escapeHtml(r.diaperSize || '—')}</td>
           <td>${r.wipes}</td>
           <td>${r.nutrition}</td>
