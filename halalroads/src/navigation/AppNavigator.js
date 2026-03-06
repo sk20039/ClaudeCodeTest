@@ -12,7 +12,7 @@ const Tab = createBottomTabNavigator();
 const ICONS = {
   Home: '🏠',
   Map: '🗺️',
-  Search: '🔍',
+  Search: '🛣️',
   Profile: '👤',
 };
 
