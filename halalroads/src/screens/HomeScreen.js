@@ -17,6 +17,7 @@ export default function HomeScreen() {
   const [location, setLocation] = useState(null);
   const [locationLabel, setLocationLabel] = useState('');
   const [locating, setLocating] = useState(false);
+  const [searchText, setSearchText] = useState('');
   const [category, setCategory] = useState('All');
   const [selectedPlace, setSelectedPlace] = useState(null);
 
@@ -46,6 +47,7 @@ export default function HomeScreen() {
 
   async function handleLocateMe() {
     setLocating(true);
+    setSearchText('');
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
@@ -60,6 +62,30 @@ export default function HomeScreen() {
       Alert.alert('Error', 'Could not get your location. Try again.');
     } finally {
       setLocating(false);
+    }
+  }
+
+  async function handleAddressSearch() {
+    const query = searchText.trim();
+    if (!query) return;
+    setLoading(true);
+    try {
+      const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&key=${MAPS_KEY}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.results?.length > 0) {
+        const { lat, lng } = data.results[0].geometry.location;
+        const coords = { latitude: lat, longitude: lng };
+        setLocation(coords);
+        setLocationLabel(data.results[0].formatted_address);
+        fetchPlaces(coords, category);
+      } else {
+        Alert.alert('Not found', 'Could not find that location. Try a different address.');
+        setLoading(false);
+      }
+    } catch {
+      Alert.alert('Error', 'Could not search that location. Check your connection.');
+      setLoading(false);
     }
   }
 
@@ -99,8 +125,22 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <View style={styles.headerRow}>
-          <Text style={styles.headerTitle}>Halal Places Near You</Text>
+        <Text style={styles.headerTitle}>Halal Places Near You</Text>
+
+        {/* Location search bar */}
+        <View style={styles.searchRow}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Enter a city or address..."
+            placeholderTextColor="rgba(255,255,255,0.6)"
+            value={searchText}
+            onChangeText={setSearchText}
+            onSubmitEditing={handleAddressSearch}
+            returnKeyType="search"
+          />
+          <TouchableOpacity style={styles.searchBtn} onPress={handleAddressSearch}>
+            <Text style={styles.searchBtnIcon}>🔍</Text>
+          </TouchableOpacity>
           <TouchableOpacity style={styles.locateBtn} onPress={handleLocateMe} disabled={locating}>
             {locating
               ? <ActivityIndicator size="small" color="#fff" />
@@ -108,6 +148,7 @@ export default function HomeScreen() {
             }
           </TouchableOpacity>
         </View>
+
         {locationLabel ? (
           <Text style={styles.locationLabel}>📌 {locationLabel}</Text>
         ) : null}
@@ -159,24 +200,42 @@ const styles = StyleSheet.create({
     backgroundColor: '#2E7D32',
     paddingTop: 50,
     paddingBottom: 16,
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
   },
-  headerRow: {
+  headerTitle: { color: '#fff', fontSize: 22, fontWeight: '700', marginBottom: 12 },
+  searchRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: 8,
   },
-  headerTitle: { color: '#fff', fontSize: 22, fontWeight: '700' },
+  searchInput: {
+    flex: 1,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    color: '#fff',
+    fontSize: 14,
+  },
+  searchBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  searchBtnIcon: { fontSize: 18 },
   locateBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 40,
+    height: 40,
+    borderRadius: 10,
     backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   locateIcon: { fontSize: 20 },
-  locationLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 13, marginTop: 6 },
+  locationLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 12, marginTop: 8 },
   categoryRow: {
     flexDirection: 'row',
     paddingHorizontal: 12,
