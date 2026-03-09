@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity,
-  StyleSheet, KeyboardAvoidingView, Platform, Alert, ActivityIndicator,
+  StyleSheet, KeyboardAvoidingView, Platform, Alert, ActivityIndicator, Image,
 } from 'react-native';
 import auth from '@react-native-firebase/auth';
 
@@ -41,8 +41,13 @@ export default function LoginScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
+      <Image
+        source={require('../../assets/halalroads_logo.png')}
+        style={styles.logo}
+        resizeMode="contain"
+      />
+
       <View style={styles.card}>
-        <Text style={styles.logo}>🕌 HalalRoads</Text>
         <Text style={styles.subtitle}>Find halal places near you</Text>
 
         <Text style={styles.title}>{mode === 'login' ? 'Sign In' : 'Create Account'}</Text>
@@ -95,7 +100,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#000',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
@@ -109,9 +114,9 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   logo: {
-    fontSize: 28,
-    textAlign: 'center',
-    marginBottom: 4,
+    width: 200,
+    height: 200,
+    marginBottom: 8,
   },
   subtitle: {
     textAlign: 'center',
