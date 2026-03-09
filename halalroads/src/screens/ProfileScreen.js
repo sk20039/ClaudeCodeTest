@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, FlatList,
-  Alert, ActivityIndicator,
+  Alert, ActivityIndicator, Linking,
 } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
@@ -59,6 +59,21 @@ export default function ProfileScreen() {
           <Text style={styles.signOutText}>Sign Out</Text>
         </TouchableOpacity>
       </View>
+
+      <TouchableOpacity
+        style={styles.businessCard}
+        onPress={() => Linking.openURL('https://www.halalroads.com')}
+        activeOpacity={0.85}
+      >
+        <Text style={styles.businessIcon}>🏪</Text>
+        <View style={styles.businessTextGroup}>
+          <Text style={styles.businessTitle}>Own a Halal Business?</Text>
+          <Text style={styles.businessSubtitle}>
+            List your business on halalroads.com so customers can find you.
+          </Text>
+        </View>
+        <Text style={styles.businessArrow}>›</Text>
+      </TouchableOpacity>
 
       <Text style={styles.sectionTitle}>My Reviews</Text>
 
@@ -140,4 +155,21 @@ const styles = StyleSheet.create({
   reviewRating: { color: '#F9A825', fontSize: 16, marginBottom: 6 },
   reviewText: { color: '#424242', fontSize: 14 },
   empty: { textAlign: 'center', color: '#9e9e9e', marginTop: 20, fontSize: 15 },
+  businessCard: {
+    backgroundColor: '#E8F5E9',
+    marginHorizontal: 16,
+    marginBottom: 16,
+    borderRadius: 14,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#A5D6A7',
+    elevation: 1,
+  },
+  businessIcon: { fontSize: 28, marginRight: 12 },
+  businessTextGroup: { flex: 1 },
+  businessTitle: { fontWeight: '700', fontSize: 15, color: '#1B5E20', marginBottom: 3 },
+  businessSubtitle: { fontSize: 13, color: '#388E3C', lineHeight: 18 },
+  businessArrow: { fontSize: 24, color: '#2E7D32', marginLeft: 8 },
 });
