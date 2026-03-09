@@ -5,8 +5,10 @@
   "build": {
     "preview": {
       "distribution": "internal",
+      "environment": "preview",
       "android": {
-        "buildType": "apk"
+        "buildType": "apk",
+        "googleServicesFile": "./android/app/google-services.json"
       }
     },
     "production": {
