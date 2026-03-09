@@ -3,6 +3,7 @@ import {
   View, Text, TextInput, TouchableOpacity, FlatList,
   StyleSheet, ActivityIndicator, Alert,
 } from 'react-native';
+import * as Location from 'expo-location';
 import PlaceCard from '../components/PlaceCard';
 import PlaceDetailModal from '../components/PlaceDetailModal';
 
@@ -53,8 +54,35 @@ export default function SearchScreen() {
   const [destination, setDestination] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [locating, setLocating] = useState(false);
   const [routeInfo, setRouteInfo] = useState(null);
   const [selectedPlace, setSelectedPlace] = useState(null);
+
+  async function handleUseMyLocation() {
+    setLocating(true);
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission denied', 'Location access is needed to auto-fill your starting point.');
+        return;
+      }
+      let loc = await Location.getLastKnownPositionAsync({});
+      if (!loc) {
+        loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+      }
+      const results = await Location.reverseGeocodeAsync(loc.coords);
+      if (results?.length > 0) {
+        const { city, region, country } = results[0];
+        setOrigin([city, region, country].filter(Boolean).join(', '));
+      } else {
+        setOrigin(`${loc.coords.latitude.toFixed(5)}, ${loc.coords.longitude.toFixed(5)}`);
+      }
+    } catch {
+      Alert.alert('Error', 'Could not get your location. Try again.');
+    } finally {
+      setLocating(false);
+    }
+  }
 
   async function findHalalStops() {
     if (!origin.trim() || !destination.trim()) {
@@ -127,6 +155,12 @@ export default function SearchScreen() {
             onChangeText={setOrigin}
             returnKeyType="next"
           />
+          <TouchableOpacity style={styles.locateBtn} onPress={handleUseMyLocation} disabled={locating}>
+            {locating
+              ? <ActivityIndicator size="small" color="#2E7D32" />
+              : <Text style={styles.locateIcon}>📍</Text>
+            }
+          </TouchableOpacity>
         </View>
         <View style={styles.routeLine} />
         <View style={styles.inputRow}>
@@ -236,6 +270,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAFAFA',
     color: '#212121',
   },
+  locateBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    backgroundColor: '#E8F5E9',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 6,
+  },
+  locateIcon: { fontSize: 18 },
   button: {
     backgroundColor: '#2E7D32',
     borderRadius: 10,
