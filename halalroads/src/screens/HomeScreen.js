@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   View, Text, FlatList, StyleSheet, ActivityIndicator,
-  RefreshControl, Alert, TouchableOpacity,
+  RefreshControl, Alert, TouchableOpacity, TextInput,
 } from 'react-native';
 import * as Location from 'expo-location';
 import PlaceCard from '../components/PlaceCard';
@@ -15,6 +15,8 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [location, setLocation] = useState(null);
+  const [locationLabel, setLocationLabel] = useState('');
+  const [locating, setLocating] = useState(false);
   const [category, setCategory] = useState('All');
   const [selectedPlace, setSelectedPlace] = useState(null);
 
@@ -38,7 +40,39 @@ export default function HomeScreen() {
       loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Low });
     }
     setLocation(loc.coords);
+    reverseGeocode(loc.coords);
     fetchPlaces(loc.coords, category);
+  }
+
+  async function handleLocateMe() {
+    setLocating(true);
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission denied', 'Location access is needed to find halal places near you.');
+        return;
+      }
+      const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+      setLocation(loc.coords);
+      reverseGeocode(loc.coords);
+      fetchPlaces(loc.coords, category);
+    } catch {
+      Alert.alert('Error', 'Could not get your location. Try again.');
+    } finally {
+      setLocating(false);
+    }
+  }
+
+  async function reverseGeocode(coords) {
+    try {
+      const results = await Location.reverseGeocodeAsync(coords);
+      if (results?.length > 0) {
+        const { city, region, country } = results[0];
+        setLocationLabel([city, region, country].filter(Boolean).join(', '));
+      }
+    } catch {
+      // fail silently
+    }
   }
 
   async function fetchPlaces(coords, cat) {
@@ -65,7 +99,18 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Halal Places Near You</Text>
+        <View style={styles.headerRow}>
+          <Text style={styles.headerTitle}>Halal Places Near You</Text>
+          <TouchableOpacity style={styles.locateBtn} onPress={handleLocateMe} disabled={locating}>
+            {locating
+              ? <ActivityIndicator size="small" color="#fff" />
+              : <Text style={styles.locateIcon}>📍</Text>
+            }
+          </TouchableOpacity>
+        </View>
+        {locationLabel ? (
+          <Text style={styles.locationLabel}>📌 {locationLabel}</Text>
+        ) : null}
       </View>
 
       {/* Category filter */}
@@ -116,7 +161,22 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
     paddingHorizontal: 20,
   },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   headerTitle: { color: '#fff', fontSize: 22, fontWeight: '700' },
+  locateBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  locateIcon: { fontSize: 20 },
+  locationLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 13, marginTop: 6 },
   categoryRow: {
     flexDirection: 'row',
     paddingHorizontal: 12,
