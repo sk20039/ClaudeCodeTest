@@ -56,3 +56,10 @@ Three views toggled by JS (`login-view` / `app-view`):
 
 - Board state is a flat 9-element array; win conditions are hardcoded index triples.
 - Scores tracked in a plain JS object `{ X, O, T }` (in-memory only, reset on refresh).
+
+## Subprojects
+
+### halalroads/
+
+A separate React Native + Expo app. It has its own `CLAUDE.md` with full details:
+`halalroads/CLAUDE.md`
