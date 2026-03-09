@@ -72,8 +72,10 @@ export default function SearchScreen() {
       }
       const results = await Location.reverseGeocodeAsync(loc.coords);
       if (results?.length > 0) {
-        const { city, region, country } = results[0];
-        setOrigin([city, region, country].filter(Boolean).join(', '));
+        const { streetNumber, street, city, region, postalCode } = results[0];
+        const street_part = [streetNumber, street].filter(Boolean).join(' ');
+        const city_part = [city, region, postalCode].filter(Boolean).join(', ');
+        setOrigin([street_part, city_part].filter(Boolean).join(', '));
       } else {
         setOrigin(`${loc.coords.latitude.toFixed(5)}, ${loc.coords.longitude.toFixed(5)}`);
       }
